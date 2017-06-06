@@ -10,7 +10,7 @@ basic authentication, it's probably best to run it on a private machine.
 Facade is licensed under GPL v2.
 
 ### Docker
-1. To use Docker, just start `./docker_run_shell.sh` script
+1. To use Docker, just start `./docker_run_shell.sh` script, image here: https://hub.docker.com/r/lukaszgryglicki/facade/
 2. Take a look at all scripts starting with `docker_`
 
 ### Server setup:
