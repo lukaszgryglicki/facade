@@ -9,6 +9,10 @@ basic authentication, it's probably best to run it on a private machine.
 
 Facade is licensed under GPL v2.
 
+### Docker
+1. To use Docker, just start `./docker_run_shell.sh` script
+2. Take a look at all scripts starting with `docker_`
+
 ### Server setup:
 
 1. Install Apache, PHP, Python, and Mysql. On Debian, run install_deps.sh
