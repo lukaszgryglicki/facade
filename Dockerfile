@@ -15,10 +15,11 @@ RUN apt-get install -y `cat requirements.txt`
 RUN service mysql start && mysql -uroot -proot < utilities/mysql_init.sql
 # Now upgrade mysql from 5.5.55 to 8.0 (will not ask for password, but without 5.5.55 istalled it would)
 RUN apt-key adv --keyserver pgp.mit.edu --recv-keys 5072E1F5
-RUN echo 'deb http://repo.mysql.com/apt/debian jessie mysql-8.0' > /etc/apt/sources.list.d/mysql.list
+# RUN echo 'deb http://repo.mysql.com/apt/debian jessie mysql-8.0' > /etc/apt/sources.list.d/mysql.list
+RUN echo 'deb http://repo.mysql.com/apt/debian jessie mysql-5.7' > /etc/apt/sources.list.d/mysql.list
 RUN apt-get update
-#RUN DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
-RUN apt-get install -y mysql-server
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server mysql-client
+# RUN apt-get install -y mysql-server mysql-client
 # Configure Apache's mod rewrite
 RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
 RUN sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
