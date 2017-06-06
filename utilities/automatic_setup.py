@@ -10,7 +10,7 @@
 
 import sys
 import os.path
-# import MySQLdb # LG:
+import MySQLdb
 # import getpass # LG:
 import imp
 # import bcrypt # LG:
@@ -584,8 +584,7 @@ if action.lower() == 'c':
 
 				root_db = MySQLdb.connect( host=db_host,
 					user = 'root',
-					passwd = root_pw,
-					charset='utf8mb4')
+					passwd = root_pw)
 				root_cursor = root_db.cursor(MySQLdb.cursors.DictCursor)
 
 			except:
@@ -595,8 +594,7 @@ if action.lower() == 'c':
 
 			try:
 
-				create_database = ("CREATE DATABASE %s "
-					"CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+				create_database = ("CREATE DATABASE %s"
 					% db_name)
 
 				root_cursor.execute(create_database)

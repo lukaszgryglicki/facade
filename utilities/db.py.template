@@ -16,8 +16,7 @@ db_host="$db_host"
 db=MySQLdb.connect(	host=db_host,
 			user=db_user,
 			passwd=db_pass,
-			db=db_name,
-			charset='utf8mb4')
+			db=db_name)
 
 cursor = db.cursor(MySQLdb.cursors.DictCursor)
 
