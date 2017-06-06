@@ -53,7 +53,7 @@ def create_settings(reset=0):
 		"id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
 		"setting VARCHAR(32) NOT NULL,"
 		"value VARCHAR(128) NOT NULL,"
-		"last_modified TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6))")
+		"last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)")
 
 	cursor.execute(create)
 	db.commit()
@@ -88,7 +88,7 @@ def create_repos_fetch_log(reset=0):
 	create = ("CREATE TABLE IF NOT EXISTS repos_fetch_log ("
 		"repos_id INT UNSIGNED NOT NULL,"
 		"status VARCHAR(128) NOT NULL,"
-		"date TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6))")
+		"date TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
 
 	cursor.execute(create)
 	db.commit()
@@ -106,7 +106,7 @@ def create_analysis_log(reset=0):
 	create = ("CREATE TABLE IF NOT EXISTS analysis_log ("
 		"repos_id INT UNSIGNED NOT NULL,"
 		"status VARCHAR(128) NOT NULL,"
-		"date_attempted TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6))")
+		"date_attempted TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
 
 	cursor.execute(create)
 	db.commit()
@@ -126,7 +126,7 @@ def create_utility_log(reset=0):
 		"id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
 		"level VARCHAR(8) NOT NULL,"
 		"status VARCHAR(128) NOT NULL,"
-		"attempted TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6))")
+		"attempted TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
 
 	cursor.execute(create)
 	db.commit()
@@ -148,7 +148,7 @@ def create_projects(reset=0):
 		"name VARCHAR(128) NOT NULL,"
 		"description VARCHAR(256),"
 		"website VARCHAR(128),"
-		"last_modified TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6))")
+		"last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)")
 
 	cursor.execute(create)
 	db.commit()
@@ -173,7 +173,7 @@ def create_repos(reset=0):
 		"git VARCHAR(256) NOT NULL,"
 		"path VARCHAR(256),"
 		"name VARCHAR(256),"
-		"added TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6),"
+		"added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
 		"status VARCHAR(32) NOT NULL,"
 		"working_commit VARCHAR(40))")
 
@@ -320,7 +320,7 @@ def create_analysis(reset=0):
 		"removed INT UNSIGNED NOT NULL,"
 		"whitespace INT UNSIGNED NOT NULL,"
 		"filename VARCHAR(4096) NOT NULL,"
-		"date_attempted TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6))")
+		"date_attempted TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
 
 	cursor.execute(create)
 	db.commit()
@@ -469,8 +469,8 @@ def create_auth(reset=0):
 		"user VARCHAR(64) UNIQUE NOT NULL,"
 		"email VARCHAR(128) NOT NULL,"
 		"password VARCHAR(64) NOT NULL,"
-		"created TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6),"
-		"last_modified TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6))")
+		"created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+		"last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)")
 
 	cursor.execute(create)
 	db.commit()
@@ -479,7 +479,7 @@ def create_auth(reset=0):
 		"id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
 		"user VARCHAR(64) NOT NULL,"
 		"status VARCHAR(96) NOT NULL,"
-		"attempted TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6))")
+		"attempted TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)")
 
 	cursor.execute(create)
 	db.commit()

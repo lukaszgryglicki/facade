@@ -1,1 +1,1 @@
-sudo vim apache2 mysql-server mysql-client php5-cli php5-mysql python-mysqldb libapache2-mod-php5 php5-curl python-bcrypt python-xlsxwriter curl php5-apcu php5-xmlrpc ssh man
+sudo vim apache2 mysql-server mysql-client php5-cli php5-mysql python-mysqldb libapache2-mod-php5 php5-curl python-bcrypt python-xlsxwriter curl php5-apcu php5-xmlrpc ssh man wget
