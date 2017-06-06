@@ -11,10 +11,12 @@ RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rew
 RUN sed -i 's/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 RUN useradd -p facade facade
 RUN echo 'facade:facade' | chpasswd
+RUN echo 'root:root' | chpasswd
+RUN adduser facade sudo
 RUN rm -rf /var/www/html
 RUN cp -R /facade/ /var/www/html
+# RUN cp php/info.php /var/www/html/info.php
 RUN service apache2 start
 RUN service ssh start
-# RUN cp php/info.php /var/www/html/info.php
 EXPOSE 80
 CMD /facade/server.sh
