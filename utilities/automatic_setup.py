@@ -586,8 +586,8 @@ if action.lower() == 'c':
 					passwd = root_pw)
 				root_cursor = root_db.cursor(MySQLdb.cursors.DictCursor)
 
-			except:
-
+			except Exception as exc:
+                                print(str(exc))
 				print 'Could not connect to database as root'
 				sys.exit(1)
 
@@ -599,8 +599,8 @@ if action.lower() == 'c':
 				root_cursor.execute(create_database)
 				root_db.commit()
 
-			except:
-
+			except Exception as exc:
+                                print(str(exc))
 				print 'Could not create database: %s' % db_name
 				sys.exit(1)
 
@@ -623,8 +623,8 @@ if action.lower() == 'c':
 				root_cursor.execute(flush_privileges)
 				root_db.commit()
 
-			except:
-
+			except Exception as exc:
+                                print(str(exc))
 				print 'Could not create user and grant privileges: %s' % db_user
 				sys.exit(1)
 
@@ -658,7 +658,8 @@ if action.lower() == 'c':
 try:
     imp.find_module('db')
     from db import db,cursor
-except:
+except Exception as exc:
+    print(str(exc))
     sys.exit("Can't find db.py.")
 
 if action.lower() == 'i' or action.lower() == 'c':
