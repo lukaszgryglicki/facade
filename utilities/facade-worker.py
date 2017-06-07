@@ -286,19 +286,15 @@ def discover_null_affiliations(attribution,email):
 		log_activity('Debug','Found domain match for %s' % email)
 
 		for match in matches:
-
-			update = ("UPDATE analysis_data "
-				"SET %s_affiliation = '%s' "
-				"WHERE %s_email = '%s' "
-				"AND %s_affiliation IS NULL "
-				"AND %s_date >= '%s'" %
-				(attribution,match['affiliation'],
-				attribution,email,
-				attribution,
-				attribution,match['start_date']))
-
-			cursor.execute(update)
-			db.commit()
+                        update = ("UPDATE analysis_data "
+                                "SET %s_affiliation = %%s "
+                                "WHERE %s_email = %%s "
+                                "AND %s_affiliation IS NULL "
+                                "AND %s_date >= %%s" %
+                                (attribution, attribution, attribution, attribution)
+			)
+                        cursor.execute(update, (match['affiliation'], email, match['start_date']))
+                        db.commit()
 
 def analyze_commit(repo_id,repo_loc,commit):
 
