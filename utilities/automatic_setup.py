@@ -58,16 +58,15 @@ def create_settings(reset=0):
 	db.commit()
 
 	initialize = ("INSERT INTO settings (setting,value) VALUES"
-		"('start_date','%s'),"
-		"('repo_directory','%s'),"
+		"('start_date',%s),"
+		"('repo_directory',%s),"
 		"('utility_status','Idle'),"
 		"('log_level','Quiet'),"
 		"('report_date','committer'),"
 		"('report_attribution','author'),"
-		"('working_author','done')"
-		% (start_date,repo_directory))
+		"('working_author','done')")
 
-	cursor.execute(initialize)
+	cursor.execute(initialize, (start_date,repo_directory))
 	db.commit()
 
 	print "Settings table created."
@@ -511,15 +510,15 @@ def create_auth(reset=0):
 			print "Passwords do not match.\n"
 
 	query = ("INSERT INTO auth (user,email,password)"
-		"VALUES ('%s','%s','%s')" % (user,email,hashed))
+		"VALUES (%s,%s,%s)")
 
-	cursor.execute(query)
+	cursor.execute(query, (user,email,hashed))
 	db.commit()
 
 	query = ("INSERT INTO auth_history (user,status)"
-		"VALUES ('%s','Created')" % user)
+		"VALUES (%s,'Created')")
 
-	cursor.execute(query)
+	cursor.execute(query, (user, ))
 	db.commit()
 
 # ==== The real program starts here ==== #
@@ -593,10 +592,9 @@ if action.lower() == 'c':
 
 			try:
 
-				create_database = ("CREATE DATABASE %s"
-					% db_name)
+				create_database = ("CREATE DATABASE %s")
 
-				root_cursor.execute(create_database)
+				root_cursor.execute(create_database, (db_name, ))
 				root_db.commit()
 
 			except Exception as exc:
@@ -606,10 +604,9 @@ if action.lower() == 'c':
 
 			try:
 
-				create_user = ("CREATE USER '%s' IDENTIFIED BY '%s'"
-					% (db_user,db_pass))
+				create_user = ("CREATE USER %s IDENTIFIED BY %s")
 
-				root_cursor.execute(create_user)
+				root_cursor.execute(create_user, (db_user,db_pass))
 				root_db.commit()
 
 				grant_privileges = ("GRANT ALL PRIVILEGES ON %s.* to %s"
