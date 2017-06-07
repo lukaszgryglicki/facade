@@ -26,6 +26,7 @@ RUN echo 'root:root' | chpasswd
 # Set Apached document root with Facade tools
 RUN rm -rf /var/www/html
 RUN cp -R /facade/ /var/www/html
+RUN ./facade_setup.sh
 EXPOSE 80
 EXPOSE 22
 # Default server command

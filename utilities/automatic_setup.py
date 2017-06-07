@@ -11,9 +11,8 @@
 import sys
 import os.path
 import MySQLdb
-# import getpass # LG:
 import imp
-# import bcrypt # LG:
+import bcrypt
 from string import Template
 import string
 import random
