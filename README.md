@@ -10,8 +10,16 @@ basic authentication, it's probably best to run it on a private machine.
 Facade is licensed under GPL v2.
 
 ### Docker
-1. To use Docker, just start `./docker_run_shell.sh` script, image here: https://hub.docker.com/r/lukaszgryglicki/facade/
+1. To use Docker, just start `./docker_run_server.sh`, image here: https://hub.docker.com/r/lukaszgryglicki/facade/
 2. Take a look at all scripts starting with `docker_`
+3. Start `./docker_ssh.sh`: user name is "facade", password is "facade".
+4. Once logged in, try: `sudo bash` (use "facade" password)
+5. To run fresh analysis of kubernetes repos (71 repositories) do: `cd /facade/utilities` and then `python facade-worker.py` - be very patient... 71 repos to clone & analyse
+6. Go to `localhost:8888 in Your browser` or use Your domain name or external IP (if You have one) instead of local host
+7. Click manage to see admin options, login with username: "admin", password "admin"
+8. If You do not want to run full analysis of k8s repos, You can restore DB from dump, there is a file: `facade_populated.sql.xz` in `/facade/dumps`
+9. Run `xz -d /facade/dumps/facade_populated.sql.xz && mysql -ufacade -pfacade facade < /facade/dumps/facade_populated.sql.xz` to restore fully populated k8s analysis (done on 2017-06-07)
+10. Also take a look at `http://localhost:8888` to see results.
 
 ### Server setup:
 
