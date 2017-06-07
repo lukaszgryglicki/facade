@@ -5,5 +5,7 @@ python automatic_setup.py c yes facade facade localhost facade no yes admin exam
 echo "Import CNCF/gitdm settings"
 python import_gitdm_configs.py -a ../cncf-config/aliases -e ../cncf-config/email-map -e ../cncf-config/domain-map -e ../cncf-config/group-map
 mkdir /opt/facade && mkdir /opt/facade/git-trees/ && chown facade /opt/facade/git-trees/
-xz -d dumps/facade2.sql.xz && mysql -ufacade -pfacade facade < dumps/facade2.sql
+cd /facade/
+echo "Restoring Facade projects/Repos setup"
+xz -d dumps/facade_configured.sql.xz && mysql -ufacade -pfacade facade < dumps/facade_configured.sql
 echo "Setup complete"
