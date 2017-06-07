@@ -1,0 +1,10 @@
+Setting,Value
+start_date,2014-01-01
+repo_directory,/opt/facade/git-trees/
+utility_status,Idle
+log_level,Quiet
+report_date,committer
+report_attribution,author
+working_author,done
+start_date,2015-01-01
+log_level,Info
