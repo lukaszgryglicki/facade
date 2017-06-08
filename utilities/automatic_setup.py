@@ -582,8 +582,8 @@ if action.lower() == 'c':
 
 				root_db = MySQLdb.connect( host=db_host,
 					user = 'root',
-					passwd = root_pw,
-                                        charset='utf8mb4')
+					passwd = root_pw)
+                                        #charset='utf8mb4')
 				root_cursor = root_db.cursor(MySQLdb.cursors.DictCursor)
 
 			except Exception as exc:
@@ -593,7 +593,8 @@ if action.lower() == 'c':
 
 			try:
 
-				create_database = ("CREATE DATABASE %s CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+				# create_database = ("CREATE DATABASE %s CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+				create_database = ("CREATE DATABASE %s")
 
 				root_cursor.execute(create_database, (db_name, ))
 				root_db.commit()
