@@ -28,10 +28,10 @@ RUN adduser facade sudo
 # Set root password
 RUN echo 'root:root' | chpasswd
 # Set Apached document root with Facade tools
-RUN rm -rf /var/www/html
-RUN cp -R /facade/ /var/www/html
 # Configure/Initialize Facade schema and admin/admin user
 RUN service mysql restart && ./facade_setup.sh && echo "Setup complete"
+RUN rm -rf /var/www/html
+RUN cp -R /facade/ /var/www/html
 EXPOSE 80
 EXPOSE 22
 # Default server command

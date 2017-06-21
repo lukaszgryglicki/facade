@@ -1,1 +1,0 @@
-docker: Error response from daemon: driver failed programming external connectivity on endpoint agitated_beaver (15ac0582487fdcc7a205c26017744612b084fb94efbd3c55686a38b0cccee46e): Bind for 0.0.0.0:8888 failed: port is already allocated.

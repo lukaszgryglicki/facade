@@ -9,7 +9,8 @@
 creds.php
 db.py
 *.pyc
-server*.log
+server1.log
+server2.log
 *.swp
 *.xlsx
 git-repos
