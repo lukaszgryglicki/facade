@@ -214,10 +214,12 @@ def create_affiliations(reset=0):
 			"('brian@bdwarner.com','(Hobbyist)')")
 
 		cursor_people.execute(populate)
+		db_people.commit()
 
                 # `affiliations` table indices:
-                cursor_people.execute("alter table affiliations add index(domain)")
-                cursor_people.execute("alter table affiliations add index(affiliation)")
+                cursor_people.execute("alter table `affiliations` add index `i_domain` (domain)")
+		db_people.commit()
+                cursor_people.execute("alter table `affiliations` add index `i_affiliation` (affiliation)")
 		db_people.commit()
 
 		populate = ("INSERT INTO affiliations(domain,affiliation,start_date) VALUES "
@@ -249,10 +251,12 @@ def create_aliases(reset=0):
 		"UNIQUE (canonical,alias))")
 
 	cursor_people.execute(create)
+	db_people.commit()
 
         # `aliases` table indices:
-        cursor_people.execute("alter table aliases add index(canonical)")
-        cursor_people.execute("alter table aliases add index(alias)")
+        cursor_people.execute("alter table `aliases` add index `i_canonical` (canonical)")
+	db_people.commit()
+        cursor_people.execute("alter table `aliases` add index `i_alias` (alias)")
 	db_people.commit()
 
 	if reset:
@@ -339,18 +343,28 @@ def create_analysis(reset=0):
 		"date_attempted TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6))")
 
 	cursor.execute(create)
+	db.commit()
 
         # `analysis_data` table indices:
-        cursor.execute("alter table analysis_data add index(repos_id)")
-        cursor.execute("alter table analysis_data add index(commit)")
-        cursor.execute("alter table analysis_data add index(author_raw_email)")
-        cursor.execute("alter table analysis_data add index(author_email)")
-        cursor.execute("alter table analysis_data add index(author_date)")
-        cursor.execute("alter table analysis_data add index(author_affiliation)")
-        cursor.execute("alter table analysis_data add index(committer_raw_email)")
-        cursor.execute("alter table analysis_data add index(committer_email)")
-        cursor.execute("alter table analysis_data add index(committer_date)")
-        cursor.execute("alter table analysis_data add index(committer_affiliation)")
+        cursor.execute("alter table `analysis_data` add index `i_repos_id` (repos_id)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_commit` (commit)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_author_raw_email` (author_raw_email)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_author_email` (author_email)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_author_date` (author_date)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_author_affiliation` (author_affiliation)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_committer_raw_email` (committer_raw_email)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_committer_email` (committer_email)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_committer_date` (committer_date)")
+	db.commit()
+        cursor.execute("alter table `analysis_data` add index `i_committer_affiliation` (committer_affiliation)")
 	db.commit()
 
 #### Cache tables ####
