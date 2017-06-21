@@ -196,8 +196,8 @@ def create_affiliations(reset=0):
 
 	create = ("CREATE TABLE IF NOT EXISTS affiliations ("
 		"id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
-		"domain VARCHAR (64) NOT NULL,"
-		"affiliation VARCHAR (64) NOT NULL,"
+		"domain VARCHAR (128) NOT NULL,"
+		"affiliation VARCHAR (128) NOT NULL,"
 		"start_date DATE NOT NULL DEFAULT '1970-01-01',"
 		"active BOOL NOT NULL DEFAULT TRUE,"
 		"last_modified TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),"
@@ -292,7 +292,7 @@ def create_special_tags(reset=0):
 		"email VARCHAR(128) NOT NULL,"
 		"start_date DATE NOT NULL,"
 		"end_date DATE,"
-		"tag VARCHAR(64) NOT NULL,"
+		"tag VARCHAR(128) NOT NULL,"
 		"UNIQUE (email,start_date,end_date,tag))")
 
 	cursor.execute(create)
@@ -473,9 +473,9 @@ def create_auth(reset=0):
 
 	create = ("CREATE TABLE IF NOT EXISTS auth ("
 		"id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
-		"user VARCHAR(64) UNIQUE NOT NULL,"
+		"user VARCHAR(128) UNIQUE NOT NULL,"
 		"email VARCHAR(128) NOT NULL,"
-		"password VARCHAR(64) NOT NULL,"
+		"password VARCHAR(128) NOT NULL,"
 		"created TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6),"
 		"last_modified TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6))")
 
@@ -484,7 +484,7 @@ def create_auth(reset=0):
 
 	create = ("CREATE TABLE IF NOT EXISTS auth_history ("
 		"id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
-		"user VARCHAR(64) NOT NULL,"
+		"user VARCHAR(128) NOT NULL,"
 		"status VARCHAR(96) NOT NULL,"
 		"attempted TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6))")
 

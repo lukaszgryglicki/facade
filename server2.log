@@ -1,1 +1,1 @@
-AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 172.17.0.2. Set the 'ServerName' directive globally to suppress this message
+docker: Error response from daemon: driver failed programming external connectivity on endpoint agitated_beaver (15ac0582487fdcc7a205c26017744612b084fb94efbd3c55686a38b0cccee46e): Bind for 0.0.0.0:8888 failed: port is already allocated.

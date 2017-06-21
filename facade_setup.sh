@@ -1,7 +1,7 @@
 #!/bin/sh
 cd /facade/utilities/
 echo "DB schema setup"
-###python automatic_setup.py c yes facade facade no localhost facade no no yes admin exampleemail@domain.com admin admin || exit 1
+python automatic_setup.py c yes facade facade no localhost facade no no yes admin exampleemail@domain.com admin admin || exit 1
 echo "Import CNCF/gitdm settings"
 ###python import_gitdm_configs.py -a ../cncf-config/aliases -e ../cncf-config/email-map -e ../cncf-config/domain-map -e ../cncf-config/group-map || exit 2
 # mkdir /opt/facade && mkdir /opt/facade/git-trees/ && chown facade /opt/facade/git-trees/
