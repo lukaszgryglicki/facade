@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright 2016 Brian Warner
+* Copyright 2016-2017 Brian Warner
 *
 * This file is part of Facade, and is made available under the terms of the GNU
 * General Public License version 2.
@@ -10,7 +10,9 @@
 
 include_once "includes/delete.php";
 include_once "includes/db.php";
-$db = setup_db();
+
+list($db,$db_people) = setup_db();
+
 session_start();
 
 // Protect against unauthorized access
@@ -584,26 +586,13 @@ if ($_POST["confirmnew_repo"]) {
 
 	if ($alias && $canonical) {
 
-		// Remove any affiliations so they can be recreated next run
-
-		$clear_author = "UPDATE analysis_data
-			SET author_affiliation = NULL
-			WHERE author_email = '" . $alias . "'";
-
-		query_db($db,$clear_author,"Clearing author affiliation");
-
-		$clear_committer = "UPDATE analysis_data
-			SET committer_affiliation = NULL
-			WHERE committer_email = '" . $alias . "'";
-
-		query_db($db,$clear_author,"Clearing committer affiliation");
-
 		// Add an alias
 
-		$add_alias = "INSERT INTO aliases (alias,canonical) VALUES ('" . $alias
-			. "','" . $canonical . "')";
+		$add_alias = "INSERT INTO aliases (alias,canonical)
+			VALUES ('" . $alias . "','" . $canonical . "')
+			ON DUPLICATE KEY UPDATE active = TRUE";
 
-		query_db($db,$add_alias,'Adding alias');
+		query_db($db_people,$add_alias,'Adding alias');
 
 	}
 
@@ -615,29 +604,12 @@ if ($_POST["confirmnew_repo"]) {
 
 	if ($id) {
 
-		// Remove any affiliations so they can be recreated next run
+		// Set alias to inactive so it will be fixed next time facade-worker.py runs
 
-		$get_alias = "SELECT alias FROM aliases WHERE id=" . $id;
+		$set_inactive = "UPDATE aliases SET active = FALSE WHERE id=" . $id;
 
-		$result = query_db($db,$get_alias,'Getting alias');
+		query_db($db_people,$set_inactive);
 
-		$alias = $result->fetch_assoc();
-
-		$clear_author = "UPDATE analysis_data
-			SET author_affiliation = NULL
-			WHERE author_email = '" . $alias['alias'] . "'";
-
-		query_db($db,$clear_author,"Clearing author affiliation");
-
-		$clear_committer = "UPDATE analysis_data
-			SET committer_affiliation = NULL
-			WHERE committer_email = '" . $alias['alias'] . "'";
-
-		query_db($db,$clear_committer,"Clearing committer affiliation");
-
-		$delete = "DELETE FROM aliases WHERE id=" . $id;
-
-		query_db($db,$delete,'Deleting alias');
 	}
 
 	header("Location: people");
@@ -697,31 +669,22 @@ if ($_POST["confirmnew_repo"]) {
 
 	if ($domain && $affiliation) {
 
-		// Delete all matching affiliations, so they will be rebuilt with
-		// corrected data next time facade-worker.py runs.
-
-		$delete = "UPDATE analysis_data SET author_affiliation = NULL WHERE
-			author_email LIKE CONCAT('%','" . $domain . "')";
-
-		query_db($db,$delete,'Clearing author info');
-
-		$delete = "UPDATE analysis_data SET committer_affiliation = NULL WHERE
-			committer_email LIKE CONCAT('%','" . $domain . "')";
-
-		query_db($db,$delete,'Clearing committer info');
+		// Add an affiliation
 
 		if ($start_date) {
 			$add_affiliation = "INSERT INTO affiliations
 				(domain,affiliation,start_date) VALUES ('"
-				. $domain . "','" . $affiliation . "','" . $start_date . "')";
+				. $domain . "','" . $affiliation . "','" . $start_date . "')
+				ON DUPLICATE KEY UPDATE active = TRUE";
 
 		} else {
 			$add_affiliation = "INSERT INTO affiliations
 				(domain,affiliation) VALUES ('"
-				. $domain . "','" . $affiliation . "')";
+				. $domain . "','" . $affiliation . "')
+				ON DUPLICATE KEY UPDATE active = TRUE";
 		}
 
-		query_db($db,$add_affiliation,'Adding affiliation');
+		query_db($db_people,$add_affiliation,'Adding affiliation');
 
 	}
 
@@ -733,27 +696,11 @@ if ($_POST["confirmnew_repo"]) {
 
 	if ($id) {
 
-		// Delete all matching affiliations, so they will be rebuilt with corrected
-		// data next time facade-worker.py runs.
+		// Set affiliation to inactive so it will be fixed next time facade-worker.py runs
 
-		$get_domain = "SELECT domain FROM affiliations WHERE id=" . $id;
+		$set_inactive = "UPDATE affiliations SET active = FALSE WHERE id=" . $id;
 
-		$result = query_db($db,$get_domain,'Getting domain');
-
-		$domain = $result->fetch_assoc();
-
-		$delete = "UPDATE analysis_data SET author_affiliation = NULL WHERE
-			author_email LIKE CONCAT('%','" . $domain['domain'] . "')";
-
-		query_db($db,$delete,'Clearing author info');
-
-		$delete = "UPDATE analysis_data SET committer_affiliation = NULL WHERE
-			committer_email LIKE CONCAT('%','" . $domain['domain'] . "')";
-
-		query_db($db,$delete,'Clearing committer info');
-
-		$delete = "DELETE FROM affiliations WHERE id=" . $id;
-		query_db($db,$delete,'Deleting affiliations');
+		query_db($db_people,$set_inactive);
 	}
 
 	header("Location: people");
@@ -764,10 +711,11 @@ if ($_POST["confirmnew_repo"]) {
 
 	$projects = query_db($db,$fetch_projects,'fetching projects');
 
-	header('Content-Type: application/csv');
+	header('Content-Type: text/csv; charset=UTF-8');
 	header('Content-Disposition: attachment; filename="facade_projects.csv";');
 
 	$f = fopen('php://output', 'w');
+
 
 	fputcsv($f, ['Project ID','Name','Description','Website'],',');
 
@@ -786,7 +734,10 @@ if ($_POST["confirmnew_repo"]) {
 		foreach ($import as $line) {
 
 			if (!$safe) {
-				if ($line[0] == 'Project ID' &&
+
+				// Need to use strpos in case file has utf-8 BOM (optional)
+
+				if (strpos($line[0],'Project ID') &&
 					$line[1] == 'Name' &&
 					$line[2] == 'Description' &&
 					$line[3] == 'Website') {
@@ -820,10 +771,12 @@ if ($_POST["confirmnew_repo"]) {
 
 	$repos = query_db($db,$fetch_repos,'fetching repos');
 
-	header('Content-Type: application/csv');
+	header('Content-Type: text/csv; charset=UTF-8');
 	header('Content-Disposition: attachment; filename="facade_repos.csv";');
 
 	$f = fopen('php://output', 'w');
+
+	fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
 	fputcsv($f, ['Repo ID','Projects ID','Git','Path','Name','Status'],',');
 
@@ -842,7 +795,10 @@ if ($_POST["confirmnew_repo"]) {
 		foreach ($import as $line) {
 
 			if (!$safe) {
-				if ($line[0] == 'Repo ID' &&
+
+				// Need to use strpos in case file has utf-8 BOM (optional)
+
+				if (strpos($line[0],'Repo ID') &&
 					$line[1] == 'Projects ID' &&
 					$line[2] == 'Git' &&
 					$line[3] == 'Path' &&
@@ -890,14 +846,18 @@ if ($_POST["confirmnew_repo"]) {
 
 } elseif ($_POST["export_aliases_csv"]) {
 
-	$fetch_aliases = "SELECT canonical,alias FROM aliases";
+	// Only export active aliases. When imported, they'll be active by default.
 
-	$aliases = query_db($db,$fetch_aliases,'fetching aliases');
+	$fetch_aliases = "SELECT canonical,alias FROM aliases WHERE active = TRUE";
 
-	header('Content-Type: application/csv');
+	$aliases = query_db($db_people,$fetch_aliases,'fetching aliases');
+
+	header('Content-Type: text/csv; charset=UTF-8');
 	header('Content-Disposition: attachment; filename="facade_aliases.csv";');
 
 	$f = fopen('php://output', 'w');
+
+	fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
 	fputcsv($f, ['Canonical email','Alias'],',');
 
@@ -916,18 +876,22 @@ if ($_POST["confirmnew_repo"]) {
 		foreach ($import as $line) {
 
 			if (!$safe) {
-				if ($line[0] == 'Canonical email' &&
+
+				// Need to use strpos in case file has utf-8 BOM (optional)
+
+				if (strpos($line[0],'Canonical email') &&
 					$line[1] == 'Alias') {
 
 					$safe = True;
 				}
 			} else {
 
-				$insert = "INSERT IGNORE INTO aliases
+				$insert = "INSERT INTO aliases
 					(canonical,alias) VALUES ('" .
-					$line[0] . "','" . $line[1] . "')";
+					$line[0] . "','" . $line[1] . "')
+					ON DUPLICATE KEY UPDATE active = TRUE";
 
-				query_db($db,$insert,'Importing alias');
+				query_db($db_people,$insert,'Importing alias');
 
 			}
 		}
@@ -937,14 +901,19 @@ if ($_POST["confirmnew_repo"]) {
 
 } elseif ($_POST["export_affiliations_csv"]) {
 
-	$fetch_affiliations = "SELECT domain,affiliation,start_date FROM affiliations";
+	// Only export active affiliations. When imported, they'll be active by default.
 
-	$affiliations = query_db($db,$fetch_affiliations,'fetching affiliations');
+	$fetch_affiliations = "SELECT domain,affiliation,start_date FROM
+		affiliations WHERE active = TRUE";
 
-	header('Content-Type: application/csv');
+	$affiliations = query_db($db_people,$fetch_affiliations,'fetching affiliations');
+
+	header('Content-Type: text/csv; charset=UTF-8');
 	header('Content-Disposition: attachment; filename="facade_affiliations.csv";');
 
 	$f = fopen('php://output', 'w');
+
+	fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
 	fputcsv($f, ['Domain','Affiliation','Beginning on'],',');
 
@@ -963,7 +932,10 @@ if ($_POST["confirmnew_repo"]) {
 		foreach ($import as $line) {
 
 			if (!$safe) {
-				if ($line[0] == 'Domain' &&
+
+				// Need to use strpos in case file has utf-8 BOM (optional)
+
+				if (strpos($line[0],'Domain') &&
 					$line[1] == 'Affiliation' &&
 					$line[2] == 'Beginning on') {
 
@@ -973,19 +945,21 @@ if ($_POST["confirmnew_repo"]) {
 
 				if ($line[2]) {
 
-				$insert = "INSERT IGNORE INTO affiliations
+				$insert = "INSERT INTO affiliations
 					(domain,affiliation,start_date) VALUES ('" .
-					$line[0] . "','" . $line[1] . "','" . $line[2] . "')";
+					$line[0] . "','" . $line[1] . "','" . $line[2] . "')
+					ON DUPLICATE KEY UPDATE active = TRUE";
 
 				} else {
 
 				$insert = "INSERT IGNORE INTO affiliations
 					(domain,affiliation) VALUES ('" .
-					$line[0] . "','" . $line[1] . "')";
+					$line[0] . "','" . $line[1] . "')
+					ON DUPLICATE KEY UPDATE active = TRUE";
 
 				}
 
-				query_db($db,$insert,'Importing affiliation');
+				query_db($db_people,$insert,'Importing affiliation');
 
 			}
 		}
@@ -999,10 +973,12 @@ if ($_POST["confirmnew_repo"]) {
 
 	$tags = query_db($db,$fetch_tags,'fetching tags');
 
-	header('Content-Type: application/csv');
+	header('Content-Type: text/csv; charset=UTF-8');
 	header('Content-Disposition: attachment; filename="facade_tags.csv";');
 
 	$f = fopen('php://output', 'w');
+
+	fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
 	fputcsv($f, ['Email','Beginning on','Ending on','Tag'],',');
 
@@ -1021,7 +997,7 @@ if ($_POST["confirmnew_repo"]) {
 		foreach ($import as $line) {
 
 			if (!$safe) {
-				if ($line[0] == 'Email' &&
+				if (strpos($line[0],'Email') &&
 					$line[1] == 'Beginning on' &&
 					$line[2] == 'Ending on' &&
 					$line[3] == 'Tag') {
@@ -1030,10 +1006,18 @@ if ($_POST["confirmnew_repo"]) {
 				}
 			} else {
 
-				$insert = "INSERT IGNORE INTO special_tags
-					(email,start_date,end_date,tag) VALUES ('" .
-					$line[0] . "','" . $line[1]  . "','" . $line[2] . "','" .
-					$line[3] . "')";
+				// Handle tags without an end date
+
+				if (!$line[2]) {
+					$insert = "INSERT IGNORE INTO special_tags
+						(email,start_date,tag) VALUES ('" .
+						$line[0] . "','" . $line[1]  . "','" . $line[3] . "')";
+				} else {
+					$insert = "INSERT IGNORE INTO special_tags
+						(email,start_date,end_date,tag) VALUES ('" .
+						$line[0] . "','" . $line[1]  . "','" . $line[2] . "','" .
+						$line[3] . "')";
+				}
 
 				query_db($db,$insert,'Importing tag');
 
@@ -1049,7 +1033,7 @@ if ($_POST["confirmnew_repo"]) {
 
 	$settings = query_db($db,$fetch_settings,'fetching settings');
 
-	header('Content-Type: application/csv');
+	header('Content-Type: text/csv; charset=UTF-8');
 	header('Content-Disposition: attachment; filename="facade_settings.csv";');
 
 	$f = fopen('php://output', 'w');
@@ -1071,7 +1055,10 @@ if ($_POST["confirmnew_repo"]) {
 		foreach ($import as $line) {
 
 			if (!$safe) {
-				if ($line[0] == 'Setting' &&
+
+				// Need to use strpos in case file has utf-8 BOM (optional)
+
+				if (strpos($line[0],'Setting') &&
 					$line[1] == 'Value') {
 
 					$safe = True;
@@ -1100,6 +1087,7 @@ if ($_POST["confirmnew_repo"]) {
 	echo "Oops, what did you want to do?\n";
 }
 
-close_db($db);
+$db->close();
+$db_people->close();
 
 ?>

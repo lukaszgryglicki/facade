@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright 2016 Brian Warner
+* Copyright 2016-2017 Brian Warner
 *
 * This file is part of Facade, and is made available under the terms of the GNU
 * General Public License version 2.
@@ -10,10 +10,13 @@
 
 $title = "Download Results";
 
-include_once "includes/header.php";
 include_once "includes/db.php";
+include_once "includes/header.php";
 include_once "includes/display.php";
-$db = setup_db();
+
+list($db,$db_people) = setup_db();
+
+include_once "includes/warnings.php";
 
 $attribution = get_setting($db,'report_attribution');
 
@@ -21,23 +24,34 @@ $attribution = get_setting($db,'report_attribution');
 $query = "SELECT NULL from analysis_data";
 $result = query_db($db,$query,'Checking if analysis has been run');
 
-if ($result->num_rows > 0) {
+// Make sure the data isn't changing
+
+if (get_setting($db,'utility_status') != 'Idle') {
+
+	echo '<div class="content-block">
+		<h3>Your data isn\'t ready yet</strong></h3>
+		<p>Facade is still working, which means the analysis data is being
+		updated. Please check back later.</p>';
+
+} elseif ($result->num_rows > 0) {
 
 	echo '<div class="content-block">
 		<h2>All Project Data</h2>
+
 		<table>
-		<tr>
-		<td class="quarter">All results: </td>
-		<td><a href="results-as-csv">csv</a></td>
+		<tr><td class="quarter">All results: </td>
+		<td>
+		<a href="results-as-csv">csv</a></td>
 		</tr>
 		<tr>
 		<td>All results, with tags: </td>
 		<td><a href="results-as-csv?with-tags">csv</a></td>
 		</tr>
-		</table></div><!-- content-block -->';
+		</table>
 
+		</div><!-- content-block -->
 
-	echo '<div class="content-block">
+		<div class="content-block">
 		<h2>Filter results</h2>
 		<form method=GET action="results-as-csv" id="filter">
 
@@ -167,5 +181,8 @@ if ($result->num_rows > 0) {
 }
 
 include_once "includes/footer.php";
-close_db($db);
+
+$db->close();
+$db_people->close();
+
 ?>

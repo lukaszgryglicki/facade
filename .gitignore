@@ -12,3 +12,5 @@ db.py
 server*.log
 *.swp
 *.xlsx
+git-repos
+config_export

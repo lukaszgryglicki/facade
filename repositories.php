@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright 2016 Brian Warner
+* Copyright 2016-2017 Brian Warner
 *
 * This file is part of Facade, and is made available under the terms of the GNU
 * General Public License version 2.
@@ -11,7 +11,8 @@
 include_once "includes/delete.php";
 include_once "includes/display.php";
 include_once "includes/db.php";
-$db = setup_db();
+
+list($db,$db_people) = setup_db();
 
 if ($_GET["repo"]) {
 
@@ -26,6 +27,7 @@ if ($_GET["repo"]) {
 	$title = 'Repo: ' . $repo_url;
 
 	include_once "includes/header.php";
+	include_once "includes/warnings.php";
 
 	// Determine if a year was requested.
 	$year = 'All';
@@ -118,6 +120,7 @@ if ($_GET["repo"]) {
 
 	$title = "Tracked Repositories";
 	include_once "includes/header.php";
+	include_once "includes/warnings.php";
 
 	echo '<div class="content-block"><h2>All repositories</h2>';
 
@@ -141,6 +144,7 @@ if ($_GET["repo"]) {
 
 include_once "includes/footer.php";
 
-close_db($db);
+$db->close();
+$db_people->close();
 
 ?>

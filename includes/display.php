@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright 2016 Brian Warner
+* Copyright 2016-2017 Brian Warner
 *
 * This file is part of Facade, and is made available under the terms of the GNU
 * General Public License version 2.
@@ -95,7 +95,7 @@ function cached_results_as_summary_table($db,$scope,$id,$type,$max_results,$year
 	if ($total_entities) {
 
         if ($stat == 'contributors') {
-            echo '<h3>Unique contributor emails';
+            echo '<h3>Unique ' . get_setting($db,'report_attribution') . ' emails';
         } else {
             if ($stat == 'removed') {
                 echo '<h3>Lines of code removed by ';
@@ -125,7 +125,7 @@ function cached_results_as_summary_table($db,$scope,$id,$type,$max_results,$year
                     echo 'all ';
                 }
 
-                echo 'contributor';
+				echo get_setting($db,'report_attribution');
                 if ($max_results != 1) {
                     echo 's';
                 }

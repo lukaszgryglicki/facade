@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright 2016 Brian Warner
+* Copyright 2016-2017 Brian Warner
 *
 * This file is part of Facade, and is made available under the terms of the GNU
 * General Public License version 2.
@@ -11,7 +11,8 @@
 include_once "includes/delete.php";
 include_once "includes/db.php";
 include_once "includes/display.php";
-$db = setup_db();
+
+list($db,$db_people) = setup_db();
 
 $attribution = get_setting($db,'report_attribution');
 
@@ -29,6 +30,7 @@ if ($_GET["id"]) {
 	$title = $project_name;
 
 	include_once "includes/header.php";
+	include_once "includes/warnings.php";
 
 	$query = "SELECT description,website FROM projects
 		WHERE id=" . $project_id;
@@ -186,6 +188,8 @@ if ($_GET["id"]) {
 	$title = "Tracked Projects";
 	include_once "includes/header.php";
 
+	include_once "includes/warnings.php";
+
 	$query = "SELECT * FROM projects ORDER BY name ASC";
 
 	$result = query_db($db,$query,"Get projects");
@@ -252,5 +256,7 @@ if ($_GET["id"] && $_SESSION['access_granted']) {
 
 include_once "includes/footer.php";
 
-close_db($db);
+$db->close();
+$db_people->close();
+
 ?>

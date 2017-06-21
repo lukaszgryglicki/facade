@@ -13,7 +13,8 @@ $title = "Affiliations and Aliases";
 include_once "includes/header.php";
 include_once "includes/db.php";
 include_once "includes/display.php";
-$db = setup_db();
+
+list($db,$db_people) = setup_db();
 
 // Protect against unauthorized access
 if (!$_SESSION['access_granted']) {
@@ -37,9 +38,9 @@ to see changes take effect.</p> </div> <!-- .content-block -->
 
 
 // Show aliases
-$get_aliases = "SELECT * FROM aliases ORDER BY canonical ASC";
+$get_aliases = "SELECT * FROM aliases WHERE active = TRUE ORDER BY canonical ASC";
 
-$result = query_db($db,$get_aliases,'Fetching aliases');
+$result = query_db($db_people,$get_aliases,'Fetching aliases');
 
 if ($result->num_rows > 0) {
 
@@ -75,9 +76,9 @@ echo '</div> <!-- .content-block --> <div class="content-block">
 
 // Show domain name mappings first
 $get_affiliations = "SELECT * FROM affiliations WHERE domain NOT LIKE '%@%'
-	ORDER BY domain ASC";
+	AND active = TRUE ORDER BY domain ASC";
 
-$result = query_db($db,$get_affiliations,'Fetching affiliations');
+$result = query_db($db_people,$get_affiliations,'Fetching affiliations');
 
 if ($result->num_rows > 0) {
 
@@ -112,9 +113,9 @@ if ($result->num_rows > 0) {
 
 // Next show email mappings
 $get_affiliations = "SELECT * FROM affiliations WHERE domain LIKE '%@%'
-	ORDER BY domain ASC, start_date DESC";
+	AND active = TRUE ORDER BY domain ASC, start_date DESC";
 
-$result = query_db($db,$get_affiliations,'Fetching affiliations');
+$result = query_db($db_people,$get_affiliations,'Fetching affiliations');
 
 if ($result->num_rows > 0) {
 
@@ -158,4 +159,7 @@ value="Add a new affiliation"></form></p>
 
 include_once "includes/footer.php";
 
-close_db($db); ?>
+$db->close();
+$db_people->close();
+
+?>

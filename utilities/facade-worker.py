@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# encoding = utf8
 
 # Copyright 2016 Brian Warner
 #
@@ -28,7 +29,7 @@ import datetime
 
 try:
 	imp.find_module('db')
-	from db import db,cursor
+	from db import db,cursor,db_people,cursor_people
 except:
 	sys.exit("Can't find db.py. Have you run setup.py?")
 
@@ -119,16 +120,19 @@ def discover_alias(email):
 
 # Match aliases with their canonical email
 
-	fetch_alias = "SELECT canonical FROM aliases WHERE alias=%s"
+	fetch_canonical = ("SELECT canonical "
+		"FROM aliases "
+		"WHERE alias=%s "
+		"AND active = TRUE")
 
-	cursor.execute(fetch_alias, (email, ))
-	db.commit()
+	cursor_people.execute(fetch_canonical, (email, ))
+	db_people.commit()
 
-	aliases = list(cursor)
+	canonical = list(cursor_people)
 
-	if aliases:
-		for alias in aliases:
-			return alias['canonical']
+	if canonical:
+		for email in canonical:
+			return email['canonical']
 	else:
 		return email
 
@@ -162,7 +166,8 @@ def trim_commit(repo_id,commit):
 # Quickly remove a given commit
 
 	remove_commit = ("DELETE FROM analysis_data "
-		"WHERE repos_id=%s AND commit=%s")
+		"WHERE repos_id=%s "
+		"AND commit=%s")
 
 	cursor.execute(remove_commit, (repo_id, commit))
 	db.commit()
@@ -174,7 +179,9 @@ def store_working_author(email):
 # Store the working author during affiliation discovery, in case it is
 # interrupted and needs to be trimmed.
 
-	store = "UPDATE settings SET value = %s WHERE setting = 'working_author'"
+	store = ("UPDATE settings "
+		"SET value = %s "
+		"WHERE setting = 'working_author'")
 
 	cursor.execute(store, (email, ))
 	db.commit()
@@ -214,23 +221,22 @@ def discover_null_affiliations(attribution,email):
 	# intentionally mangled emails (e.g. "developer at domain.com") that have
 	# been added as an affiliation rather than an alias.
 
-	match_email = discover_alias(email)
-
 	find_exact_match = ("SELECT affiliation,start_date "
 		"FROM affiliations "
 		"WHERE domain = %s "
+		"AND active = TRUE "
 		"ORDER BY start_date DESC")
 
-	cursor.execute(find_exact_match, (match_email, ))
-	db.commit
+	cursor_people.execute(find_exact_match, (email, ))
+	db_people.commit
 
-	matches = list(cursor)
+	matches = list(cursor_people)
 
-	if not matches and match_email.find('@') < 0:
+	if not matches and email.find('@') < 0:
 
 		# It's not a properly formatted email, leave it NULL and log it.
 
-		log_activity('Info','Unmatchable email: %s' % match_email)
+		log_activity('Info','Unmatchable email: %s' % email)
 
 		return
 
@@ -238,17 +244,18 @@ def discover_null_affiliations(attribution,email):
 
 		# Now we go for a domain-level match. Try for an exact match.
 
-		domain = match_email[match_email.find('@')+1:]
+		domain = email[email.find('@')+1:]
 
 		find_exact_domain = ("SELECT affiliation,start_date "
 			"FROM affiliations "
 			"WHERE domain= %s "
+			"AND active = TRUE "
 			"ORDER BY start_date DESC")
 
-		cursor.execute(find_exact_domain, (domain, ))
-		db.commit()
+		cursor_people.execute(find_exact_domain, (domain, ))
+		db_people.commit()
 
-		matches = list(cursor)
+		matches = list(cursor_people)
 
 	if not matches:
 
@@ -257,12 +264,13 @@ def discover_null_affiliations(attribution,email):
 		find_domain = ("SELECT affiliation,start_date "
 			"FROM affiliations "
 			"WHERE domain = %s "
+			"AND active = TRUE "
 			"ORDER BY start_date DESC")
 
-		cursor.execute(find_domain, (domain[domain.rfind('.',0,domain.rfind('.',0))+1:], ))
-		db.commit()
+		cursor_people.execute(find_domain, (domain[domain.rfind('.',0,domain.rfind('.',0))+1:], ))
+		db_people.commit()
 
-		matches = list(cursor)
+		matches = list(cursor_people)
 
 	if not matches:
 
@@ -317,11 +325,11 @@ def analyze_commit(repo_id,repo_loc,commit):
 		if len(line) > 0:
 
 			if line.find('author_name:') == 0:
-				author_name = line[13:].replace("'","\\'")
+				author_name = unicode(line[13:].replace("'","\\'"),"utf8","replace")
 				continue
 
 			if line.find('author_email:') == 0:
-				author_email = line[14:].replace("'","\\'")
+				author_email = unicode(line[14:].replace("'","\\'"),"utf8","replace")
 				continue
 
 			if line.find('author_date:') == 0:
@@ -329,11 +337,11 @@ def analyze_commit(repo_id,repo_loc,commit):
 				continue
 
 			if line.find('committer_name:') == 0:
-				committer_name = line[16:].replace("'","\\'")
+				committer_name = unicode(line[16:].replace("'","\\'"),"utf8","replace")
 				continue
 
 			if line.find('committer_email:') == 0:
-				committer_email = line[17:].replace("'","\\'")
+				committer_email = unicode(line[17:].replace("'","\\'"),"utf8","replace")
 				continue
 
 			if line.find('committer_date:') == 0:
@@ -353,16 +361,16 @@ def analyze_commit(repo_id,repo_loc,commit):
 
 			if line.find('--- a/') == 0:
 				if filename == '(Deleted) ':
-					filename = filename + line[6:].replace("'","\\'")
+					filename = unicode(filename + line[6:].replace("'","\\'"),"utf8","replace")
 				continue
 
 			if line.find('+++ b/') == 0:
 				if not filename.find('(Deleted) ') == 0:
-					filename = line[6:].replace("'","\\'")
+					filename = unicode(line[6:].replace("'","\\'"),"utf8","replace")
 				continue
 
 			if line.find('rename to ') == 0:
-				filename = line[10:].replace("'","\\'")
+				filename = unicode(line[10:].replace("'","\\'"),"utf8","replace")
 				continue
 
 			if line.find('deleted file ') == 0:
@@ -458,20 +466,17 @@ def store_commit(repos_id,commit,filename,
 	# Some systems append extra info after a second @
 	author_email = strip_extra_amp(author_email)
 	committer_email = strip_extra_amp(committer_email)
-
 	store = ("INSERT INTO analysis_data (repos_id,commit,filename,"
-		"author_name,author_email,author_date,"
-		"committer_name,committer_email,committer_date,"
-		"added,removed,whitespace) VALUES ("
-		"%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)")
+		"author_name,author_raw_email,author_email,author_date,"
+		"committer_name,committer_raw_email,committer_email,committer_date,"
+		"added,removed,whitespace) "
+		"VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)")
 
 	cursor.execute(store, (
-                repos_id,commit,filename,
-		author_name,author_email,author_date,
-		committer_name,committer_email,committer_date,
-		added,removed,whitespace
-                )
-        )
+		repos_id,commit,filename,
+		author_name,author_email,discover_alias(author_email),author_date,
+		committer_name,committer_email,discover_alias(committer_email),committer_date,
+		added,removed,whitespace))
 	db.commit()
 
 	log_activity('Debug','Stored commit: %s' % commit)
@@ -761,7 +766,7 @@ def analysis():
 		trimmed_commits = existing_commits - parent_commits
 
 		log_activity('Debug','Commits to be trimmed from repo %s: %s' %
-			(repo['id'],trimmed_commits))
+			(repo['id'],len(trimmed_commits)))
 
 		for commit in trimmed_commits:
 
@@ -801,6 +806,115 @@ def fill_empty_affiliations():
 
 	update_status('Filling empty affiliations')
 	log_activity('Info','Filling empty affiliations')
+
+	# Process any changes to the affiliations or aliases, and set any existing
+	# entries in analysis_data to NULL so they are filled properly.
+
+	# First, get the time we started fetching since we'll need it later
+
+	cursor.execute("SELECT current_timestamp(6) as fetched")
+
+	affiliations_fetched = cursor.fetchone()['fetched']
+
+	# Now find the last time we worked on affiliations, to figure out what's new
+
+	affiliations_processed = get_setting('affiliations_processed')
+
+	get_changed_affiliations = ("SELECT domain FROM affiliations WHERE "
+		"last_modified >= %s")
+
+	cursor_people.execute(get_changed_affiliations, (affiliations_processed, ))
+
+	changed_affiliations = list(cursor_people)
+
+	# Process any affiliations which changed since we last checked
+
+	for changed_affiliation in changed_affiliations:
+
+		log_activity('Debug','Resetting affiliation for %s' %
+			changed_affiliation['domain'])
+
+		set_author_to_null = ("UPDATE analysis_data SET author_affiliation = NULL "
+			"WHERE author_email LIKE CONCAT('%%',%s)")
+
+		cursor.execute(set_author_to_null, (changed_affiliation['domain'], ))
+		db.commit()
+
+		set_committer_to_null = ("UPDATE analysis_data SET committer_affiliation = NULL "
+			"WHERE committer_email LIKE CONCAT('%%',%s)")
+
+		cursor.execute(set_committer_to_null, (changed_affiliation['domain'], ))
+		db.commit()
+
+	# Update the last fetched date, so we know where to start next time.
+
+	update_affiliations_date = ("UPDATE settings SET value=%s "
+		"WHERE setting = 'affiliations_processed'")
+
+	cursor.execute(update_affiliations_date, (affiliations_fetched, ))
+	db.commit()
+
+	# On to the aliases, now
+
+	# First, get the time we started fetching since we'll need it later
+
+	cursor.execute("SELECT current_timestamp(6) as fetched")
+
+	aliases_fetched = cursor.fetchone()['fetched']
+
+	# Now find the last time we worked on aliases, to figure out what's new
+
+	aliases_processed = get_setting('aliases_processed')
+
+	get_changed_aliases = ("SELECT alias FROM aliases WHERE "
+		"last_modified >= %s")
+
+	cursor_people.execute(get_changed_aliases, (aliases_processed, ))
+
+	changed_aliases = list(cursor_people)
+
+	# Process any aliases which changed since we last checked
+
+	for changed_alias in changed_aliases:
+
+		log_activity('Debug','Resetting affiliation for %s' %
+			changed_alias['alias'])
+
+		set_author_to_null = ("UPDATE analysis_data SET author_affiliation = NULL "
+			"WHERE author_raw_email LIKE CONCAT('%%',%s)")
+
+		cursor.execute(set_author_to_null,(changed_alias['alias'], ))
+		db.commit()
+
+		set_committer_to_null = ("UPDATE analysis_data SET committer_affiliation = NULL "
+			"WHERE committer_raw_email LIKE CONCAT('%%',%s)")
+
+		cursor.execute(set_committer_to_null, (changed_alias['alias'], ))
+		db.commit()
+
+		reset_author = ("UPDATE analysis_data "
+			"SET author_email = %s "
+			"WHERE author_raw_email = %s")
+
+		cursor.execute(reset_author, (discover_alias(changed_alias['alias']),changed_alias['alias']))
+		db.commit
+
+		reset_committer = ("UPDATE analysis_data "
+			"SET committer_email = %s "
+			"WHERE committer_raw_email = %s")
+
+		cursor.execute(reset_committer, (discover_alias(changed_alias['alias'],changed_alias['alias'])))
+		db.commit
+
+	# Update the last fetched date, so we know where to start next time.
+
+	update_aliases_date = ("UPDATE settings SET value=%s "
+		"WHERE setting = 'aliases_processed'")
+
+	cursor.execute(update_aliases_date, (aliases_fetched, ))
+	db.commit()
+
+	# Now rebuild the affiliation data
 
 	working_author = get_setting('working_author').replace("'","\\'")
 
@@ -1261,4 +1375,6 @@ elapsed_time = time.time() - start_time
 print '\nCompleted in %s\n' % datetime.timedelta(seconds=int(elapsed_time))
 
 cursor.close()
+cursor_people.close()
 db.close()
+db_people.close()

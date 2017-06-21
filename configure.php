@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright 2016 Brian Warner
+* Copyright 2016-2017 Brian Warner
 *
 * This file is part of Facade, and is made available under the terms of the GNU
 # General Public License version 2.
@@ -12,7 +12,8 @@ $title = "Configuration";
 
 include_once "includes/header.php";
 include_once "includes/db.php";
-$db = setup_db();
+
+list($db,$db_people) = setup_db();
 
 // Check if user is authenticated.  If not, bounce to login page
 if (!$_SESSION['access_granted']) {
@@ -94,7 +95,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 				meaningful in general situations.</p>
 
 				<p>This does not affect data exported as a CSV, which will
-				always contain both fields.</p>
+				always contain both fields. However, to see the changes you will
+				need to re-run facade-worker.py</p>
 
 				<p><label><input type="radio" name="date_radio" value="author"
 				id="author_date" checked="checked">Author</label></p>
@@ -112,7 +114,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 				(who applied the patch).</p>
 
 				<p>This does not affect data exported as a CSV, which will
-				always contain both fields.</p>
+				always contain both fields. However, to see the changes you will
+				need to re-run facade-worker.py</p>
 
 				<p><label><input type="radio" name="attribution_radio" value="author"
 				id="author_email" checked="checked">Author</label></p>
@@ -340,5 +343,6 @@ project and repos remain consistent.</p>
 </div> <!-- .content-block -->';
 
 include_once "includes/footer.php";
-close_db($db);
+$db->close();
+$db_people->close();
 ?>

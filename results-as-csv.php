@@ -1,7 +1,7 @@
 <?php
 
 /*
-* Copyright 2016 Brian Warner
+* Copyright 2016-2017 Brian Warner
 *
 * This file is part of Facade, and is made available under the terms of the GNU
 * General Public License version 2.
@@ -9,13 +9,27 @@
 */
 
 include_once "includes/db.php";
-$db = setup_db();
+
+list($db,$db_people) = setup_db();
 
 $project = array();
 $tags = array();
 $affiliations = array();
 
 $report_attribution = get_setting($db,'report_attribution');
+$report_date = get_setting($db,'report_date');
+
+if ($report_attribution == 'author') {
+	$tag_author = 'Author Email';
+} else {
+	$tag_author = 'Committer Email';
+}
+
+if ($report_date == 'author') {
+	$tag_date = 'Author Date';
+} else {
+	$tag_date = 'Committer Date';
+}
 
 // Handle custom dates
 if ($_GET["start"] == 'custom') {
@@ -75,10 +89,12 @@ if (isset($_GET["affiliations"])) {
 
 // Get ready for export
 $header=TRUE;
-header('Content-Type: application/csv');
+header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="facade_results.csv";');
 
 $f = fopen('php://output', 'w');
+
+fputs($f, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
 
 // Walk through the project IDs
 foreach ($projects as $project) {
@@ -96,10 +112,12 @@ foreach ($projects as $project) {
 			r.name AS 'Repo Name',
 			a.author_date AS 'Author Date',
 			a.author_name AS 'Author Name',
+			a.author_raw_email AS 'Author Raw Email',
 			a.author_email AS 'Author Email',
 			a.author_affiliation AS 'Author Affiliation',
 			a.committer_date AS 'Committer Date',
 			a.committer_name AS 'Committer Name',
+			a.committer_raw_email AS 'Committer Raw Email',
 			a.committer_email AS 'Committer Email',
 			a.committer_affiliation AS 'Committer Affiliation',
 			a.added AS 'LoC Added',
@@ -136,8 +154,8 @@ foreach ($projects as $project) {
 
 					// Find tags that with a start_date before this row
 					$query = "SELECT id,end_date FROM special_tags
-						WHERE email = '" . str_replace("'","\'",$row["Email"]) . "'
-						AND start_date <= '" . $row["Start Date"] . "'
+						WHERE email = '" . str_replace("'","\'",$row[$tag_author]) . "'
+						AND start_date <= '" . $row[$tag_date] . "'
 						AND tag='" . $tag . "'";
 
 					$tags_result = query_db($db, $query, 'Getting tags');
@@ -145,9 +163,10 @@ foreach ($projects as $project) {
 					// Add any tags with an end_date after this row, or no end_date.
 					$add_tag = FALSE;
 					while ($tags_row = $tags_result->fetch_assoc()) {
-						if ($tags_row["end_date"] >= $row["Start Date"] ||
+						if ($tags_row["end_date"] >= $row[$tag_date] ||
 						$tags_row["end_date"] == NULL) {
 							$add_tag = TRUE;
+
 						}
 					}
 
@@ -167,7 +186,6 @@ foreach ($projects as $project) {
 				fputcsv($f, array_keys($row), ',');
 				$header=FALSE;
 			}
-
 				fputcsv($f, $row, ',');
 		}
 
@@ -179,5 +197,7 @@ foreach ($projects as $project) {
 	}
 }
 
-close_db($db);
+$db->close();
+$db_people->close();
+
 ?>
