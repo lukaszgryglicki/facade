@@ -1,0 +1,1 @@
+apt-utils mysql-server mysql-client php-mysql sudo vim apache2 php-cli libapache2-mod-php php-curl python-bcrypt python-xlsxwriter curl php-apcu php-xmlrpc ssh man wget xz-utils pylint git python-mysqldb

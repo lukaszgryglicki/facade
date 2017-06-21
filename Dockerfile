@@ -2,21 +2,14 @@
 # Use debian-jessie as source
 FROM debian
 MAINTAINER Łukasz Gryglicki<lukaszgryglicki@o2.pl>
-# Echo add newer/unstable package source
-RUN echo 'deb http://ftp.debian.org/debian jessie-backports main' > /etc/apt/sources.list.d/sources.list
 WORKDIR /facade
 ADD . /facade
 # Avoid mysql-server installer ask for password
 RUN ./utilities/mysql_root_pwd.sh
 # Initial update apt-get
-RUN apt-key adv --keyserver pgp.mit.edu --recv-keys 5072E1F5
-RUN echo 'deb http://repo.mysql.com/apt/debian jessie mysql-5.7' > /etc/apt/sources.list.d/mysql.list
-RUN apt-get update
-# Install all stable requirements
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y `cat requirements_stable.txt`
-# Install all backports requirements
-RUN DEBIAN_FRONTEND=noninteractive apt-get -t jessie-backports install -y `cat requirements_backports.txt`
-# Initialize facade DB
+RUN DEBIAN_FRONTEND=noninteractive apt-get update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y `cat requirements.txt`
+# Initialize Facade DB
 RUN service mysql start && mysql -uroot -proot < utilities/mysql_init.sql
 # Configure Apache's mod rewrite
 RUN ln -s /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled/rewrite.load
