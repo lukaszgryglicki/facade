@@ -9,6 +9,6 @@
 creds.php
 db.py
 *.pyc
-
+server*.log
 *.swp
 *.xlsx
