@@ -17,5 +17,5 @@ echo "Restoring Facade projects/Repos setup"
 # Restore version configured for Kubernetes but without generated data
 # xz -d dumps/facade_configured.sql.xz && mysql -ufacade -pfacade facade < dumps/facade_configured.sql
 # Restore version configured for Kubernetes and completed analysis on 2017-06-07 11:30 UTC
-# xz -d dumps/facade_populated.sql.xz && mysql -ufacade -pfacade facade < dumps/facade_populated.sql
+xz -d dumps/facade_populated.sql.xz && mysql -ufacade -pfacade facade < dumps/facade_populated.sql
 echo "Setup complete"
