@@ -214,11 +214,16 @@ def create_affiliations(reset=0):
 			"('brian@bdwarner.com','(Hobbyist)')")
 
 		cursor_people.execute(populate)
+
+                # `affiliations` table indices:
+                cursor_people.execute("alter table affiliations add index(domain)")
+                cursor_people.execute("alter table affiliations add index(affiliation)")
 		db_people.commit()
 
 		populate = ("INSERT INTO affiliations(domain,affiliation,start_date) VALUES "
 			"('brian@bdwarner.com','Samsung','2015-07-05'),"
 			"('brian@bdwarner.com','The Linux Foundation','2011-01-06'),"
+			"('lukaszgryglicki@o2.pl','CNCF','2017-03-01'),"
 			"('brian@bdwarner.com','IBM','2006-05-20')")
 
 		cursor_people.execute(populate)
@@ -244,6 +249,10 @@ def create_aliases(reset=0):
 		"UNIQUE (canonical,alias))")
 
 	cursor_people.execute(create)
+
+        # `aliases` table indices:
+        cursor_people.execute("alter table aliases add index(canonical)")
+        cursor_people.execute("alter table aliases add index(alias)")
 	db_people.commit()
 
 	if reset:
@@ -330,6 +339,18 @@ def create_analysis(reset=0):
 		"date_attempted TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6))")
 
 	cursor.execute(create)
+
+        # `analysis_data` table indices:
+        cursor.execute("alter table analysis_data add index(repos_id)")
+        cursor.execute("alter table analysis_data add index(commit)")
+        cursor.execute("alter table analysis_data add index(author_raw_email)")
+        cursor.execute("alter table analysis_data add index(author_email)")
+        cursor.execute("alter table analysis_data add index(author_date)")
+        cursor.execute("alter table analysis_data add index(author_affiliation)")
+        cursor.execute("alter table analysis_data add index(committer_raw_email)")
+        cursor.execute("alter table analysis_data add index(committer_email)")
+        cursor.execute("alter table analysis_data add index(committer_date)")
+        cursor.execute("alter table analysis_data add index(committer_affiliation)")
 	db.commit()
 
 #### Cache tables ####

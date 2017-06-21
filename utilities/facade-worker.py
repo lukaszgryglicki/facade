@@ -835,13 +835,13 @@ def fill_empty_affiliations():
 			changed_affiliation['domain'])
 
 		set_author_to_null = ("UPDATE analysis_data SET author_affiliation = NULL "
-			"WHERE author_email LIKE CONCAT('%%',%s)")
+			"WHERE author_email = %s")
 
 		cursor.execute(set_author_to_null, (changed_affiliation['domain'], ))
 		db.commit()
 
 		set_committer_to_null = ("UPDATE analysis_data SET committer_affiliation = NULL "
-			"WHERE committer_email LIKE CONCAT('%%',%s)")
+			"WHERE committer_email = %s")
 
 		cursor.execute(set_committer_to_null, (changed_affiliation['domain'], ))
 		db.commit()
@@ -881,13 +881,13 @@ def fill_empty_affiliations():
 			changed_alias['alias'])
 
 		set_author_to_null = ("UPDATE analysis_data SET author_affiliation = NULL "
-			"WHERE author_raw_email LIKE CONCAT('%%',%s)")
+			"WHERE author_raw_email = %s")
 
 		cursor.execute(set_author_to_null,(changed_alias['alias'], ))
 		db.commit()
 
 		set_committer_to_null = ("UPDATE analysis_data SET committer_affiliation = NULL "
-			"WHERE committer_raw_email LIKE CONCAT('%%',%s)")
+			"WHERE committer_raw_email = %s")
 
 		cursor.execute(set_committer_to_null, (changed_alias['alias'], ))
 		db.commit()
