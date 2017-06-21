@@ -216,12 +216,6 @@ def create_affiliations(reset=0):
 		cursor_people.execute(populate)
 		db_people.commit()
 
-                # `affiliations` table indices:
-                cursor_people.execute("alter table `affiliations` add index `i_domain` (domain)")
-		db_people.commit()
-                cursor_people.execute("alter table `affiliations` add index `i_affiliation` (affiliation)")
-		db_people.commit()
-
 		populate = ("INSERT INTO affiliations(domain,affiliation,start_date) VALUES "
 			"('brian@bdwarner.com','Samsung','2015-07-05'),"
 			"('brian@bdwarner.com','The Linux Foundation','2011-01-06'),"
@@ -251,12 +245,6 @@ def create_aliases(reset=0):
 		"UNIQUE (canonical,alias))")
 
 	cursor_people.execute(create)
-	db_people.commit()
-
-        # `aliases` table indices:
-        cursor_people.execute("alter table `aliases` add index `i_canonical` (canonical)")
-	db_people.commit()
-        cursor_people.execute("alter table `aliases` add index `i_alias` (alias)")
 	db_people.commit()
 
 	if reset:

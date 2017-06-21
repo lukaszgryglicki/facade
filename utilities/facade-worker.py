@@ -831,7 +831,7 @@ def fill_empty_affiliations():
 
 	for changed_affiliation in changed_affiliations:
 
-		log_activity('Debug','Resetting affiliation for %s' %
+		log_activity('Info','Resetting affiliation for %s' %
 			changed_affiliation['domain'])
 
 		set_author_to_null = ("UPDATE analysis_data SET author_affiliation = NULL "
@@ -877,7 +877,7 @@ def fill_empty_affiliations():
 
 	for changed_alias in changed_aliases:
 
-		log_activity('Debug','Resetting affiliation for %s' %
+		log_activity('Info','Resetting affiliation for %s' %
 			changed_alias['alias'])
 
 		set_author_to_null = ("UPDATE analysis_data SET author_affiliation = NULL "
@@ -935,7 +935,7 @@ def fill_empty_affiliations():
 
 	null_authors = list(cursor)
 
-	log_activity('Debug','Found %s authors with NULL affiliation' %
+	log_activity('Info','Found %s authors with NULL affiliation' %
 		len(null_authors))
 
 	for null_author in null_authors:
@@ -960,7 +960,7 @@ def fill_empty_affiliations():
 
 	null_committers = list(cursor)
 
-	log_activity('Debug','Found %s committers with NULL affiliation' %
+	log_activity('Info','Found %s committers with NULL affiliation' %
 		len(null_committers))
 
 	for null_committer in null_committers:

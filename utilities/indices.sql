@@ -1,0 +1,10 @@
+alter table `analysis_data` add index `i_repos_id` (repos_id);
+alter table `analysis_data` add index `i_commit` (commit);
+alter table `analysis_data` add index `i_author_raw_email` (author_raw_email);
+alter table `analysis_data` add index `i_author_email` (author_email);
+alter table `analysis_data` add index `i_author_date` (author_date);
+alter table `analysis_data` add index `i_author_affiliation` (author_affiliation);
+alter table `analysis_data` add index `i_committer_raw_email` (committer_raw_email);
+alter table `analysis_data` add index `i_committer_email` (committer_email);
+alter table `analysis_data` add index `i_committer_date` (committer_date);
+alter table `analysis_data` add index `i_committer_affiliation` (committer_affiliation);
